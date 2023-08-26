@@ -33,22 +33,24 @@ int s21_determinant(matrix_t *A, double *result) {
         }
         s21_remove_matrix(&minor);
       }
-    }  else error = CALCULATION_ERR;
-  } else error = INCORRECT_MATRIX;
+    } else
+      error = CALCULATION_ERR;
+  } else
+    error = INCORRECT_MATRIX;
   return error;
 }
 
 int s21_calc_complements(matrix_t *A, matrix_t *result) {
   int error = OK;
-  if(s21_check_matrix(A)) {
+  if (s21_check_matrix(A)) {
     if (A->rows == A->columns) {
       s21_create_matrix(A->rows, A->columns, result);
-      if(A->rows > 1) {
+      if (A->rows > 1) {
         matrix_t minor;
         error = s21_create_matrix(A->columns - 1, A->rows - 1, &minor);
         if (error == OK) {
-          for (int i = 0; i < result->rows; i ++) {
-            for(int j = 0; j < result->columns; j++) {
+          for (int i = 0; i < result->rows; i++) {
+            for (int j = 0; j < result->columns; j++) {
               s21_get_minor(A, &minor, i, j);
               int sign = ((i + j) % 2 == 0) ? 1 : -1;
               double determin = 0;
@@ -56,11 +58,15 @@ int s21_calc_complements(matrix_t *A, matrix_t *result) {
               result->matrix[i][j] = sign * determin;
             }
           }
-        } else error = INCORRECT_MATRIX;
+        } else
+          error = INCORRECT_MATRIX;
         s21_remove_matrix(&minor);
-      } else result->matrix[0][0] = A->matrix[0][0];
-    }  else error = CALCULATION_ERR;
-  } else error = INCORRECT_MATRIX;
+      } else
+        result->matrix[0][0] = A->matrix[0][0];
+    } else
+      error = CALCULATION_ERR;
+  } else
+    error = INCORRECT_MATRIX;
   return error;
 }
 
@@ -95,15 +101,17 @@ int s21_inverse_matrix(matrix_t *A, matrix_t *result) {
 
 int s21_transpose(matrix_t *A, matrix_t *result) {
   int return_res = OK;
-  if(A && result && A->matrix) {
+  if (A && result && A->matrix) {
     return_res = s21_create_matrix(A->columns, A->rows, result);
     if (return_res == OK) {
-      for (int i = 0; i < result->rows; i ++) {
-        for(int j = 0; j < result->columns; j++) {
+      for (int i = 0; i < result->rows; i++) {
+        for (int j = 0; j < result->columns; j++) {
           result->matrix[i][j] = A->matrix[j][i];
         }
       }
-    } else return_res = INCORRECT_MATRIX;
-  } else return_res = INCORRECT_MATRIX;
+    } else
+      return_res = INCORRECT_MATRIX;
+  } else
+    return_res = INCORRECT_MATRIX;
   return return_res;
 }

@@ -1,23 +1,29 @@
 CC=gcc
-FLAGS=-Wall -Wextra -Werror
-LIBS=-lm -lcheck
+FLAGS=-Wall -Wextra -Werror -std=c11 -g
 
+OS = $(shell uname)
 SRC=$(wildcard *.c)
-# OBJ=$(patsubst %.c,%.o,$(SRC))
-
 TEST_SRC=$(wildcard ./tests/*.c)
-# TEST_OBJ=$(patsubst %.c,%.o,$(TEST_SRC))
+
+ifeq ($(OS), Linux)
+	GFLAGS = -lcheck -lpthread -lrt -lm -lsubunit
+endif
+ifeq ($(OS), Darwin)
+	GFLAGS = -lcheck
+	GCOV_FLAGS = -fprofile-arcs -ftest-coverage
+endif
 
 all: clean s21_matrix.a test
 
 s21_matrix.a:
-	@$(CC) $(CFLAGS) $(GCOV_FLAGS) $(SRC) -c
+	@$(CC) $(FLAGS) $(GCOV_FLAGS) $(SRC) -c
 	ar rc s21_matrix.a *.o
 	ranlib s21_matrix.a
+	@-rm -rf *.o
 
-test:
-	@$(CC) $(CFLAGS) $(det_OS) --coverage $(SOURCE_TESTS_FUNC) s21_matrix.a -o s21_test_matrix
-	./s21_test_matrix
+test: clean s21_matrix.a
+	@$(CC) $(FLAGS) $(GFLAGS) $(TEST_SRC) $(GCOV_FLAGS) -L. s21_matrix.a -o test
+	@./test
 
 gcov_report:
 	@lcov -t "s21_test_matrix" -o test.info --no-external -c -d .
@@ -26,32 +32,21 @@ gcov_report:
 	rm -rf *.gcno *gcda *.gco
 
 clean:
-	rm -rf *.a
-	rm -rf *.o
-	rm -rf function_files/*.o
-	rm -rf function_files/*.gcda
-	rm -rf function_files/*.gcno
-	rm -rf tests/*.o
-	rm -rf tests/*.gcda
-	rm -rf tests/*.gcno
-	rm -rf a.out
-	rm -rf *.dSYM
-	rm -rf *.out
-	rm -rf test
-	rm -rf main
-	rm -rf gcov_report
-	rm -rf *.info
-	rm -rf *.gcda
-	rm -rf *.gcno
-
-# gcov_report: GCOVFLAGS = -lcheck --coverage
-# gcov_report: DEBUGFLAGS = -g
-# gcov_report: test
-# gcov_report:
-# 	geninfo ./ -b ./ -o ./coverage.info
-# 	genhtml coverage.info -o gcov_report
-# 	xdg-open gcov_report/index.html
-
+	@rm -rf *.a *.o
+	@rm -rf function_files/*.o
+	@rm -rf function_files/*.gcda
+	@rm -rf function_files/*.gcno
+	@rm -rf tests/*.o
+	@rm -rf tests/*.gcda
+	@rm -rf tests/*.gcno
+	@rm -rf a.out
+	@rm -rf *.dSYM report
+	@rm -rf *.out
+	@rm -rf test
+	@rm -rf gcov_report
+	@rm -rf *.info
+	@rm -rf *.gcda
+	@rm -rf *.gcno
 
 style:
 	clang-format -n -style=google *.h *.c $(TEST_SRC)
@@ -62,7 +57,7 @@ style_repair:
 	@clang-format -i -style=google *.h *.c $(TEST_SRC)
 
 leaks:
-	leaks -atExit -- ./test
+	leaks -atExit -- ./s21_test_matrix
 
 install_brew:
 	cd ~
