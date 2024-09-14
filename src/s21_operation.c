@@ -19,7 +19,7 @@ void s21_get_minor(matrix_t *A, matrix_t *minor, int cur_row, int cur_col) {
 int s21_determinant(matrix_t *A, double *result) {
   int error = OK;
   if (s21_check_matrix(A)) {
-    if (A->rows == A->columns && A->rows > 0) {
+    if (A->rows == A->columns) {
       if (A->rows == 1)
         *result = A->matrix[0][0];
       else {
